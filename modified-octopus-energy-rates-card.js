@@ -114,12 +114,9 @@ class ModifiedOctopusEnergyRatesCard extends HTMLElement {
         // TODO: there should be one clear data process loop and one rendering loop? Or a function?
         var rates_list_length = 0;
         const timeNow = Date.now();
-        console.log ("timeNow: "+timeNow);
 
         rates.every(function (key) {
             const date_milli = Date.parse(key.valid_from);
-//            var date = new Date(date_milli);
-//            if(showpast || (date - Date.parse(new Date())>-1800000)) {
             if(showpast || (date_milli - timeNow>-1800000)) {
                 rates_list_length++;
             }
@@ -127,15 +124,15 @@ class ModifiedOctopusEnergyRatesCard extends HTMLElement {
 
             return true;
         });
-        console.log ("rates_list_length: "+rates_list_length);
         const rows_per_col = Math.ceil(rates_list_length / config.cols);
 
         var tables = "";
         tables = tables.concat("<td><table class='sub_table'><tbody>");
         var table = ""
         var x = 1;
+        var displayedPeriods=0;
 
-        rates.forEach(function (key) {
+        rates.every(function (key) {
             const date_milli = Date.parse(key.valid_from);
             var date = new Date(date_milli);
             const lang = navigator.language || navigator.languages[0];
@@ -150,8 +147,8 @@ class ModifiedOctopusEnergyRatesCard extends HTMLElement {
             else if(key.value_inc_vat > config.mediumlimit) colour = colours[2];
             else if(key.value_inc_vat <= 0 ) colour = colours[3];
 
-            if(showpast || (date - Date.parse(new Date())>-1800000)) {
-                table = table.concat("<tr class='rate_row'><td class='time time_"+colour+"'>" + date_locale + time_locale + 
+            if(showpast || (date_milli - timeNow>-1800000)) {
+                    table = table.concat("<tr class='rate_row'><td class='time time_"+colour+"'>" + date_locale + time_locale + 
                         "</td><td class='rate "+colour+"'>" + key.value_inc_vat.toFixed(roundUnits) + unitstr + "</td></tr>");
                 if (x % rows_per_col == 0) {
                     tables = tables.concat(table);
@@ -162,7 +159,10 @@ class ModifiedOctopusEnergyRatesCard extends HTMLElement {
                     }
                 };
                 x++;
+                displayedPeriods++;
             }
+            if (displayedPeriods>=maxPeriods) return false;
+            return true;
 
         });
         tables = tables.concat(table);
