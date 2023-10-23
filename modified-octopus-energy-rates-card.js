@@ -114,7 +114,6 @@ class ModifiedOctopusEnergyRatesCard extends HTMLElement {
         // TODO: there should be one clear data process loop and one rendering loop? Or a function?
         var rates_list_length = 0;
         const timeNow = Date.now();
-
         rates.every(function (key) {
             const date_milli = Date.parse(key.valid_from);
             if(showpast || (date_milli - timeNow>-1800000)) {
@@ -125,6 +124,18 @@ class ModifiedOctopusEnergyRatesCard extends HTMLElement {
             return true;
         });
         const rows_per_col = Math.ceil(rates_list_length / config.cols);
+
+        // TODO: Handle missing targetEntityId
+        const targetEntityId = config.targetEntity;
+        const targetTimes = hass.states[targetEntityId].attributes.target_times;
+        if (!hass.states[targetEntityId].attributes.next_time)
+        {
+            console.log ("Target times: not defined");
+        }
+        else
+        {
+            console.log ("Target times: "+targetTimes);
+        }
 
         var tables = "";
         tables = tables.concat("<td><table class='sub_table'><tbody>");
